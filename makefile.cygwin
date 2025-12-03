@@ -1,0 +1,41 @@
+##################################
+# <jwright> Well, I may be doing stupid things with make
+# <jwright> OK, it was Makefile stupid'ness
+# <jwright> I don't really understand what the hell I am doing with Make, I'm
+#           just copying other files and seeing what works.
+# <dragorn> heh
+# <dragorn> i think thats all anyone does
+# <dragorn> make is a twisted beast
+##################################
+
+WPDPACK		= ../wpdpack
+
+CFLAGS		= -g3 -Og -std=gnu11 \
+		  -Wall -Wextra -Wpedantic -Wstrict-prototypes
+CPPFLAGS	= -D_FILE_OFFSET_BITS=64
+LDLIBS		= -L$(WPDPACK)/lib -lwpcap
+
+PROG		= asleap.exe genkeys.exe
+COMMON_OBJS	= common.obj des.obj des-tables.obj md4.obj \
+                  sha1.obj utils.obj
+
+all: $(PROG)
+
+asleap.exe: asleap.obj $(COMMON_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
+
+genkeys.exe: genkeys.obj $(COMMON_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
+
+asleap.obj: asleap.c asleap.h utils.h common.h version.h sha1.h radiotap.h \
+ byteswap.h ieee80211.h ieee8021x.h ietfproto.h
+common.obj: common.c common.h utils.h md4.h
+des.obj: des.c des.h
+des-tables.obj: des-tables.c des.h
+genkeys.obj: genkeys.c common.h version.h utils.h
+sha1.obj: sha1.c common.h sha1.h
+md4.obj: md4.c md4.h
+utils.obj: utils.c utils.h
+
+clean:
+	-$(RM) -f $(PROG) asleap.obj genkeys.obj $(COMMON_OBJS)
